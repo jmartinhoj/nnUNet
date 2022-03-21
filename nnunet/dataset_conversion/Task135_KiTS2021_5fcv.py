@@ -21,18 +21,27 @@ if __name__ == '__main__':
     out_base = join(nnUNet_raw_data, foldername)
     imagestr = join(out_base, "imagesTr")
     labelstr = join(out_base, "labelsTr")
+    imagests = join(out_base, "imagesTs")
+    labelsts = join(out_base, "labelsTs")
     maybe_mkdir_p(imagestr)
     maybe_mkdir_p(labelstr)
-
+    maybe_mkdir_p(imagests)
+    maybe_mkdir_p(labelsts)
+    test_fold = 0 #0 to 4
+    test_range = range(int(test_fold*300/5), int((test_fold+1)*300/5))
     case_ids = subdirs(kits_data_dir, prefix='case_', join=False)
     for c in tqdm(case_ids):
         if isfile(join(kits_data_dir, c, kits_segmentation_filename)):
-            os.symlink(join(kits_data_dir, c, kits_segmentation_filename), join(labelstr, c + '.nii.gz'))
-            os.symlink(join(kits_data_dir, c, 'imaging.nii.gz'), join(imagestr, c + '_0000.nii.gz'))
+            if(int(c.split("_")[1]) in test_range):
+                os.symlink(join(kits_data_dir, c, kits_segmentation_filename), join(labelsts, c + '.nii.gz'))
+                os.symlink(join(kits_data_dir, c, 'imaging.nii.gz'), join(imagests, c + '_0000.nii.gz'))
+            else:    
+                os.symlink(join(kits_data_dir, c, kits_segmentation_filename), join(labelstr, c + '.nii.gz'))
+                os.symlink(join(kits_data_dir, c, 'imaging.nii.gz'), join(imagestr, c + '_0000.nii.gz'))
 
     generate_dataset_json(join(out_base, 'dataset.json'),
                           imagestr,
-                          None,
+                          imagests,
                           ('CT',),
                           {
                               0: 'background',

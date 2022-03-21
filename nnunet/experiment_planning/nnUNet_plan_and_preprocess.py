@@ -148,8 +148,11 @@ def main():
         threads = (tl, tf)
 
         print("number of threads: ", threads, "\n")
-
+        print("planner_3d: " + str(planner_3d))
+        print("planner_2d: " + str(planner_2d))
         if planner_3d is not None:
+
+            print("----------------3d processing")
             if args.overwrite_plans is not None:
                 assert args.overwrite_plans_identifier is not None, "You need to specify -overwrite_plans_identifier"
                 exp_planner = planner_3d(cropped_out_dir, preprocessing_output_dir_this_task, args.overwrite_plans,
@@ -160,6 +163,7 @@ def main():
             if not dont_run_preprocessing:  # double negative, yooo
                 exp_planner.run_preprocessing(threads)
         if planner_2d is not None:
+            print("-----------------2d processing")
             exp_planner = planner_2d(cropped_out_dir, preprocessing_output_dir_this_task)
             exp_planner.plan_experiment()
             if not dont_run_preprocessing:  # double negative, yooo

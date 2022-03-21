@@ -20,12 +20,15 @@ import numpy as np
 
 def convert_id_to_task_name(task_id: int):
     startswith = "Task%03.0d" % task_id
+
     if preprocessing_output_dir is not None:
         candidates_preprocessed = subdirs(preprocessing_output_dir, prefix=startswith, join=False)
     else:
         candidates_preprocessed = []
 
     if nnUNet_raw_data is not None:
+        print("---------------raw_data: " + nnUNet_raw_data)
+        print("---------------startswith: " + startswith)
         candidates_raw = subdirs(nnUNet_raw_data, prefix=startswith, join=False)
     else:
         candidates_raw = []
