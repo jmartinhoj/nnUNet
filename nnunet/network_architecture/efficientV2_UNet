@@ -166,7 +166,7 @@ class Upsample(nn.Module):
                                          align_corners=self.align_corners)
 
 
-class Efficient_UNet(SegmentationNetwork):
+class EfficientV2_UNet(SegmentationNetwork):
     DEFAULT_BATCH_SIZE_3D = 2
     DEFAULT_PATCH_SIZE_3D = (64, 192, 160)
     SPACING_FACTOR_BETWEEN_STAGES = 2
@@ -202,7 +202,7 @@ class Efficient_UNet(SegmentationNetwork):
 
         Questions? -> f.isensee@dkfz.de
         """
-        super(Efficient_UNet, self).__init__()
+        super(EfficientV2_UNet, self).__init__()
         self.convolutional_upsampling = convolutional_upsampling
         self.convolutional_pooling = convolutional_pooling # True
         self.upscale_logits = upscale_logits

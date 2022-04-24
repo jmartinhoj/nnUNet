@@ -13,7 +13,7 @@
 #    limitations under the License.
 from typing import List
 
-import numpy as np
+import numpy as np\
 from batchgenerators.dataloading.nondet_multi_threaded_augmenter import NonDetMultiThreadedAugmenter
 from batchgenerators.transforms.abstract_transforms import AbstractTransform, Compose
 from batchgenerators.transforms.channel_selection_transforms import SegChannelSelectionTransform

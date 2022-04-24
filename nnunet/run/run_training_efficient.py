@@ -8,6 +8,7 @@ from nnunet.training.network_training.nnUNetTrainer import nnUNetTrainer
 from nnunet.training.network_training.nnUNetTrainerCascadeFullRes import nnUNetTrainerCascadeFullRes
 from nnunet.training.network_training.nnUNetTrainerV2_CascadeFullRes import nnUNetTrainerV2CascadeFullRes
 from nnunet.utilities.task_name_id_conversion import convert_id_to_task_name
+import wandb
 
 
 def main():
@@ -67,8 +68,15 @@ def main():
                         help='path to nnU-Net checkpoint file to be used as pretrained model (use .model '
                              'file, for example model_final_checkpoint.model). Will only be used when actually training. '
                              'Optional. Beta. Use with caution.')
+    parser.add_argument('--disable_wandb', required=False, default = False, action="store_true")
+
 
     args = parser.parse_args()
+
+    if not args.disable_wandb:
+        wandb.init(project='eff-nnUNet')
+    else:
+        wandb.init(project='eff-nnUNet', mode="disabled")
 
     task = args.task
     fold = args.fold
@@ -130,6 +138,28 @@ def main():
         trainer.save_latest_only = True  # if false it will not store/overwrite _latest but separate files each
 
     trainer.initialize(not validation_only)
+
+    if find_lr:
+        trainer.find_lr()
+    else:
+        if not validation_only:
+            if args.continue_training:
+                # -c was set, continue a previous training and ignore pretrained weights
+                trainer.load_latest_checkpoint()
+            elif (not args.continue_training) and (args.pretrained_weights is not None):
+                # we start a new training. If pretrained_weights are set, use them
+                load_pretrained_weights(trainer.network, args.pretrained_weights)
+            else:
+                # new training without pretraine weights, do nothing
+                pass
+
+            trainer.run_training()
+        else:
+            if valbest:
+                trainer.load_best_checkpoint(train=False)
+            else:
+                trainer.load_final_checkpoint(train=False)
+
 
     trainer.network.eval()
 

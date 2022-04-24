@@ -37,6 +37,7 @@ from abc import abstractmethod
 from datetime import datetime
 from tqdm import trange
 from nnunet.utilities.to_torch import maybe_to_torch, to_cuda
+import wandb
 
 
 class NetworkTrainer(object):
@@ -205,13 +206,27 @@ class NetworkTrainer(object):
 
             ax.plot(x_values, self.all_val_losses, color='r', ls='-', label="loss_val, train=False")
 
+
+            b1 = False
+            b2 = False
             if len(self.all_val_losses_tr_mode) > 0:
+                b1 = True
                 ax.plot(x_values, self.all_val_losses_tr_mode, color='g', ls='-', label="loss_val, train=True")
             if len(self.all_val_eval_metrics) == len(x_values):
+                b2 = True
                 ax2.plot(x_values, self.all_val_eval_metrics, color='g', ls='--', label="evaluation metric")
 
+            if(not b1 and not b2):
+                wandb.log({"epoch": self.epoch, 'loss_val, train=False': self.all_val_losses[-1], 'loss_tr': self.all_tr_losses[-1]})
+            elif(b1 and not b2):
+                wandb.log({"epoch": self.epoch, 'loss_val, train=False': self.all_val_losses[-1], "loss_val, trin=True": self.all_val_losses_tr_mode[-1], 'loss_tr': self.all_tr_losses[-1]})
+            elif(not b1 and b2):
+                wandb.log({"epoch": self.epoch, 'loss_val, train=False': self.all_val_losses[-1], 'loss_tr': self.all_tr_losses[-1], "eval_metric": self.all_val_eval_metrics[-1]})
+            else:
+                wandb.log({"epoch": self.epoch, 'loss_val, train=False': self.all_val_losses[-1], "loss_val, trin=True": self.all_val_losses_tr_mode[-1], 'loss_tr': self.all_tr_losses[-1],  "eval_metric": self.all_val_eval_metrics[-1]})
+
             ax.set_xlabel("epoch")
-            ax.set_ylabel("loss")
+            ax.set_ylabel("loss")   
             ax2.set_ylabel("evaluation metric")
             ax.legend()
             ax2.legend(loc=9)
