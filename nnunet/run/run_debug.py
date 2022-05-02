@@ -98,10 +98,8 @@ def main():
     # interp_order_z = args.interp_order_z
     # force_separate_z = args.force_separate_z
 
-    if not args.disable_wandb:
-        wandb.init(project='nnUNet', id=network_trainer, resume=False) # efficient_complex
-    else:
-        wandb.init(project='nnUNet', mode="disabled")
+
+    wandb.init(project='nnUNet', mode="disabled")
 
         
     if not task.startswith("Task"):
@@ -140,28 +138,7 @@ def main():
         # the training chashes
         trainer.save_latest_only = True  # if false it will not store/overwrite _latest but separate files each
 
-    trainer.initialize(not validation_only)
-
-    if find_lr:
-        trainer.find_lr()
-    else:
-        if not validation_only:
-            if args.continue_training:
-                # -c was set, continue a previous training and ignore pretrained weights
-                trainer.load_latest_checkpoint()
-            elif (not args.continue_training) and (args.pretrained_weights is not None):
-                # we start a new training. If pretrained_weights are set, use them
-                load_pretrained_weights(trainer.network, args.pretrained_weights)
-            else:
-                # new training without pretraine weights, do nothing
-                pass
-
-            trainer.run_training()
-        else:
-            if valbest:
-                trainer.load_best_checkpoint(train=False)
-            else:
-                trainer.load_final_checkpoint(train=False)
+    trainer.initialize(False)
 
 
     trainer.network.eval()

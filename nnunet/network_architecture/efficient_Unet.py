@@ -192,7 +192,7 @@ class Efficient_UNet(SegmentationNetwork):
                  conv_kernel_sizes=None,
                  upscale_logits=False, convolutional_pooling=False, convolutional_upsampling=False,
                  max_num_features=None, basic_block=ConvDropoutNormNonlin,
-                 seg_output_use_bias=False):
+                 seg_output_use_bias=False, efficient_model = "efficientnet-b0"):
         """
         basically more flexible than v1, architecture is the same
 
@@ -275,7 +275,7 @@ class Efficient_UNet(SegmentationNetwork):
 
 
         # ENCODER
-        blocks_args, global_params = get_model_params("efficientnet-b0", override_params={"image_size": 128}) # TODO@jmartinhoj: DYNAMIC MODEL NAME
+        blocks_args, global_params = get_model_params(efficient_model, override_params={"image_size": 128}) # TODO@jmartinhoj: DYNAMIC MODEL NAME
         self.eff_net = EfficientNet3D(blocks_args, global_params, in_channels=1)
 
         self.eff_drop_connect_rate = global_params.drop_connect_rate
