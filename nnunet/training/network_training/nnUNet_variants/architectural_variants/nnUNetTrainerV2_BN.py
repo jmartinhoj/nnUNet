@@ -20,7 +20,7 @@ from torch import nn
 
 
 class nnUNetTrainerV2_BN(nnUNetTrainerV2):
-    def initialize_network(self):
+    def initialize_network(self, training=True):
         """
         changed deep supervision to False
         :return:

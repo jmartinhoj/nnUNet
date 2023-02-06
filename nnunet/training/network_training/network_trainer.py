@@ -301,6 +301,12 @@ class NetworkTrainer(object):
 
         torch.save(save_this, fname)
         self.print_to_log_file("done, saving took %.2f seconds" % (time() - start_time))
+        start_time = time()
+        self.print_to_log_file("uploading checkpoint to wandb...")
+        wandb.save(fname)
+        self.print_to_log_file("done, uploading took %.2f seconds" % (time() - start_time))
+
+
 
     def load_best_checkpoint(self, train=True):
         if self.fold is None:
@@ -336,7 +342,7 @@ class NetworkTrainer(object):
         self.load_checkpoint_ram(saved_model, train)
 
     @abstractmethod
-    def initialize_network(self):
+    def initialize_network(self, training=True):
         """
         initialize self.network here
         :return:
@@ -377,7 +383,13 @@ class NetworkTrainer(object):
                 if 'amp_grad_scaler' in checkpoint.keys():
                     self.amp_grad_scaler.load_state_dict(checkpoint['amp_grad_scaler'])
 
-        self.network.load_state_dict(new_state_dict)
+        try:
+            self.network.load_state_dict(new_state_dict)
+        except RuntimeError as e:
+            print("error loading state dict:")
+            print(e)
+            print("trying with strict=False...")
+            self.network.load_state_dict(new_state_dict, strict=False)
         self.epoch = checkpoint['epoch']
         if train:
             optimizer_state_dict = checkpoint['optimizer_state_dict']
@@ -439,7 +451,7 @@ class NetworkTrainer(object):
         self._maybe_init_amp()
 
         maybe_mkdir_p(self.output_folder)        
-        self.plot_network_architecture()
+        # self.plot_network_architecture()
 
         if cudnn.benchmark and cudnn.deterministic:
             warn("torch.backends.cudnn.deterministic is True indicating a deterministic training is desired. "
@@ -470,7 +482,7 @@ class NetworkTrainer(object):
                 for _ in range(self.num_batches_per_epoch):
                     l = self.run_iteration(self.tr_gen, True)
                     train_losses_epoch.append(l)
-
+            print("fim de uma época")
             self.all_tr_losses.append(np.mean(train_losses_epoch))
             self.print_to_log_file("train loss : %.4f" % self.all_tr_losses[-1])
 

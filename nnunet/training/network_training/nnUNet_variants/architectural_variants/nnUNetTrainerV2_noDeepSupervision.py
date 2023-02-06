@@ -132,7 +132,7 @@ class nnUNetTrainerV2_noDeepSupervision(nnUNetTrainerV2):
             self.print_to_log_file('self.was_initialized is True, not running self.initialize again')
         self.was_initialized = True
 
-    def initialize_network(self):
+    def initialize_network(self, training=True):
         """
         changed deep supervision to False
         :return:

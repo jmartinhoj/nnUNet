@@ -225,12 +225,12 @@ class nnUNetTrainer(NetworkTrainer):
                                    also_print_to_console=False)
         else:
             pass
-        self.initialize_network()
+        self.initialize_network(training)
         self.initialize_optimizer_and_scheduler()
         # assert isinstance(self.network, (SegmentationNetwork, nn.DataParallel))
         self.was_initialized = True
 
-    def initialize_network(self):
+    def initialize_network(self, training=True):
         """
         This is specific to the U-Net and must be adapted for other network architectures
         :return:

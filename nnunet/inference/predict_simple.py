@@ -213,7 +213,9 @@ def main():
                               args.plans_identifier)
     print("using model stored in ", model_folder_name)
     assert isdir(model_folder_name), "model output folder not found. Expected: %s" % model_folder_name
-
+    
+    
+    # nnUNet_predict -i /media/jomstorage/datasets/nnUNet_raw_data/Task001_KiTS2021/imagesTs -o /media/jomstorage/out/seg_out_fullyeff_b7_VAE -t 1 tr nnUNetTrainer_fullyefficient_b7_VAE_lr3 -m 3d_fullres -f 0
     predict_from_folder(model_folder_name, input_folder, output_folder, folds, save_npz, num_threads_preprocessing,
                         num_threads_nifti_save, lowres_segmentations, part_id, num_parts, not disable_tta,
                         overwrite_existing=overwrite_existing, mode=mode, overwrite_all_in_gpu=all_in_gpu,

@@ -36,7 +36,7 @@ class GeLU(nn.Module):
 
 
 class nnUNetTrainerV2_GeLU(nnUNetTrainerV2):
-    def initialize_network(self):
+    def initialize_network(self, training=True):
         """
         - momentum 0.99
         - SGD instead of Adam

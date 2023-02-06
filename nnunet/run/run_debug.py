@@ -138,8 +138,14 @@ def main():
         # the training chashes
         trainer.save_latest_only = True  # if false it will not store/overwrite _latest but separate files each
 
-    trainer.initialize(False)
+    trainer.initialize(True)
 
+    # trainer.find_lr() # just to test
+
+    # try:
+    #     trainer.load_latest_checkpoint()
+    # except RuntimeError:
+    #     print("No checkpoint found, starting with default weights...")
 
     trainer.network.eval()
 

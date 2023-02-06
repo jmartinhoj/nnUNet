@@ -20,7 +20,7 @@ from torch import nn
 
 
 class nnUNetTrainerV2_lReLU_convReLUIN(nnUNetTrainerV2):
-    def initialize_network(self):
+    def initialize_network(self, training=True):
         if self.threeD:
             conv_op = nn.Conv3d
             dropout_op = nn.Dropout3d

@@ -28,7 +28,7 @@ class nnUNetTrainerV2_MMS(nnUNetTrainerV2_insaneDA):
 
         self.data_aug_params['gamma_range'] = (0.5, 1.6)
 
-    def initialize_network(self):
+    def initialize_network(self, training=True):
         if self.threeD:
             conv_op = nn.Conv3d
             dropout_op = nn.Dropout3d

@@ -118,7 +118,7 @@ class nnUNetTrainerV2(nnUNetTrainer):
             else:
                 pass
 
-            self.initialize_network()
+            self.initialize_network(training)
             self.initialize_optimizer_and_scheduler()
 
             assert isinstance(self.network, (SegmentationNetwork, nn.DataParallel))
@@ -126,7 +126,7 @@ class nnUNetTrainerV2(nnUNetTrainer):
             self.print_to_log_file('self.was_initialized is True, not running self.initialize again')
         self.was_initialized = True
 
-    def initialize_network(self):
+    def initialize_network(self, training):
         """
         - momentum 0.99
         - SGD instead of Adam
@@ -187,6 +187,8 @@ class nnUNetTrainerV2(nnUNetTrainer):
         We need to wrap this because we need to enforce self.network.do_ds = False for prediction
         """
         ds = self.network.do_ds
+        vae = self.network.use_VAE
+        self.network.use_VAE = False
         self.network.do_ds = False
         ret = super().validate(do_mirroring=do_mirroring, use_sliding_window=use_sliding_window, step_size=step_size,
                                save_softmax=save_softmax, use_gaussian=use_gaussian,
@@ -195,6 +197,7 @@ class nnUNetTrainerV2(nnUNetTrainer):
                                run_postprocessing_on_folds=run_postprocessing_on_folds)
 
         self.network.do_ds = ds
+        self.network.use_VAE = vae
         return ret
 
     def predict_preprocessed_data_return_seg_and_softmax(self, data: np.ndarray, do_mirroring: bool = True,
@@ -411,7 +414,9 @@ class nnUNetTrainerV2(nnUNetTrainer):
         :return:
         """
         super().on_epoch_end()
+        self.dl_tr.reset_chosen_keys()
         continue_training = self.epoch < self.max_num_epochs
+
 
         # it can rarely happen that the momentum of nnUNetTrainerV2 is too high for some dataset. If at epoch 100 the
         # estimated validation Dice is still 0 then we reduce the momentum from 0.99 to 0.95

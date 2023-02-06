@@ -276,7 +276,7 @@ class EfficientV2_UNet(SegmentationNetwork):
 
         # ENCODER
         blocks_args, global_params = get_model_params("efficientnet-b0", override_params={"image_size": 128}) # TODO@jmartinhoj: DYNAMIC MODEL NAME
-        self.eff_net = EfficientNet3D(blocks_args, global_params, in_channels=1)
+        self.eff_net = EfficientNet3D(blocks_args, global_params, in_channels=input_channels)
 
         self.eff_drop_connect_rate = global_params.drop_connect_rate
 

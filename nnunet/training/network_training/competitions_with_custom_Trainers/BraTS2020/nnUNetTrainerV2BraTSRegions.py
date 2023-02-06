@@ -37,7 +37,7 @@ from nnunet.utilities.to_torch import maybe_to_torch, to_cuda
 
 
 class nnUNetTrainerV2BraTSRegions_BN(nnUNetTrainerV2):
-    def initialize_network(self):
+    def initialize_network(self, training=True):
         if self.threeD:
             conv_op = nn.Conv3d
             dropout_op = nn.Dropout3d
@@ -79,7 +79,7 @@ class nnUNetTrainerV2BraTSRegions(nnUNetTrainerV2):
         """
         self.num_classes = len(self.regions)
 
-    def initialize_network(self):
+    def initialize_network(self, training=True):
         """inference_apply_nonlin to sigmoid"""
         super().initialize_network()
         self.network.inference_apply_nonlin = nn.Sigmoid()
@@ -215,7 +215,7 @@ class nnUNetTrainerV2BraTSRegions_DDP(nnUNetTrainerV2_DDP):
         """
         self.num_classes = len(self.regions)
 
-    def initialize_network(self):
+    def initialize_network(self, training=True):
         """inference_apply_nonlin to sigmoid"""
         super().initialize_network()
         self.network.inference_apply_nonlin = nn.Sigmoid()

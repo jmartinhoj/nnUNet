@@ -25,7 +25,7 @@ from nnunet.utilities.nd_softmax import softmax_helper
 
 
 class nnUNetTrainerV2_ResencUNet_DA3(nnUNetTrainerV2_DA3):
-    def initialize_network(self):
+    def initialize_network(self, training=True):
         if self.threeD:
             cfg = get_default_network_config(3, None, norm_type="in")
 

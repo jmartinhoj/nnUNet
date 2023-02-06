@@ -1,0 +1,65 @@
+nohup: ignoring input
+
+
+Please cite the following paper when using nnUNet:
+
+Isensee, F., Jaeger, P.F., Kohl, S.A.A. et al. "nnU-Net: a self-configuring method for deep learning-based biomedical image segmentation." Nat Methods (2020). https://doi.org/10.1038/s41592-020-01008-z
+
+
+If you have questions or suggestions, feel free to open an issue at https://github.com/MIC-DKFZ/nnUNet
+
+---------------raw_data: /media/jomstorage/datasets/nnUNet_raw_data
+---------------startswith: Task002
+[]
+['Task002_HECKTOR']
+['Task002_HECKTOR']
+['Task002_HECKTOR']
+['Task002_HECKTOR', 'Task002_HECKTOR', 'Task002_HECKTOR']
+###############################################
+I am running the following nnUNet: 3d_fullres
+My trainer class is:  <class 'nnunet.training.network_training.nnUNetTrainer_efficient_inftime.nnUNetTrainer_efficient_inftime'>
+For that I will be using the following configuration:
+num_classes:  2
+modalities:  {0: 'CT', 1: 'PT'}
+use_mask_for_norm OrderedDict([(0, False), (1, False)])
+keep_only_largest_region None
+min_region_size_per_class None
+min_size_per_class None
+normalization_schemes OrderedDict([(0, 'CT'), (1, 'nonCT')])
+stages...
+
+stage:  0
+{'batch_size': 2, 'num_pool_per_axis': [4, 5, 5], 'patch_size': array([ 96, 160, 160]), 'median_patient_size_in_voxels': array([142, 263, 263]), 'current_spacing': array([2.92161713, 1.90209356, 1.90209356]), 'original_spacing': array([1.5       , 0.97656202, 0.97656202]), 'do_dummy_2D_data_aug': False, 'pool_op_kernel_sizes': [[2, 2, 2], [2, 2, 2], [2, 2, 2], [2, 2, 2], [1, 2, 2]], 'conv_kernel_sizes': [[3, 3, 3], [3, 3, 3], [3, 3, 3], [3, 3, 3], [3, 3, 3], [3, 3, 3]]}
+
+stage:  1
+{'batch_size': 2, 'num_pool_per_axis': [4, 5, 5], 'patch_size': array([ 96, 160, 160]), 'median_patient_size_in_voxels': array([277, 512, 512]), 'current_spacing': array([1.5       , 0.97656202, 0.97656202]), 'original_spacing': array([1.5       , 0.97656202, 0.97656202]), 'do_dummy_2D_data_aug': False, 'pool_op_kernel_sizes': [[2, 2, 2], [2, 2, 2], [2, 2, 2], [2, 2, 2], [1, 2, 2]], 'conv_kernel_sizes': [[3, 3, 3], [3, 3, 3], [3, 3, 3], [3, 3, 3], [3, 3, 3], [3, 3, 3]]}
+
+I am using stage 1 from these plans
+I am using batch dice + CE loss
+
+I am using data from this folder:  /media/jomstorage/out/nnUNet_preprocessed/Task002_HECKTOR/nnUNetData_plans_v2.1
+###############################################
+vamos lá ver
+Generic_UNet
+102.08608241271973
+Generic_FullyEffUNet
+152.06563061523437
+Efficient_UNet_v2
+92.09459492492675
+Efficient_UNet_v2
+106.65581973266602
+Efficient_UNet_v2
+129.43629718017579
+Efficient_UNet
+81.79195486450195
+Fully_Efficient_UNet
+119.54202003479004
+Fully_Efficient_UNet
+145.54465502929688
+Fully_Efficient_UNet
+184.79009799194336
+Fullyefficient_UNet_v2
+133.48468933105468
+Fullyefficient_UNet_v2
+170.1247261352539
+finish

@@ -16,9 +16,9 @@ class nnUNetTrainer_efficient(nnUNetTrainerV2):
         super().__init__(plans_file, fold, output_folder, dataset_directory, batch_dice, stage,
                  unpack_data, deterministic, fp16)
 
-        self.max_num_epochs = 1500
+        self.max_num_epochs = 1000
     
-    def initialize_network(self):
+    def initialize_network(self, training=True):
         """
         - momentum 0.99
         - SGD instead of Adam

@@ -3,6 +3,7 @@ This file contains helper functions for building the model and for loading model
 These helper functions are built to mirror those in the official TensorFlow implementation.
 """
 
+from array import array
 import re
 import math
 import collections
@@ -11,7 +12,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 from torch.utils import model_zoo
-
+import numpy as np
 ########################################################################
 ############### HELPERS FUNCTIONS FOR MODEL ARCHITECTURE ###############
 ########################################################################
@@ -120,6 +121,44 @@ class Conv3dDynamicSamePadding(nn.Conv3d):
         return F.conv3d(x, self.weight, self.bias, self.stride, self.padding, self.dilation, self.groups)
 
 
+class Conv3dStaticSamePadding_flopsready(nn.Module):
+    """ 3D Convolutions like TensorFlow, for a fixed image size"""
+
+    def __init__(self, in_channels, out_channels, kernel_size, image_size=None, **kwargs):
+        # super().__init__(in_channels, out_channels, kernel_size, **kwargs)
+        super().__init__()
+        self.convop = nn.Conv3d(in_channels, out_channels, kernel_size, **kwargs)
+    
+        self.convop.stride = self.convop.stride if len(self.convop.stride) == 3 else [self.convop.stride[0]] * 3
+
+        # Calculate padding based on image size and save it
+        assert image_size is not None
+        ih, iw, iz = image_size if type(image_size) == list else [image_size, image_size, image_size]
+        kh, kw, kz = self.convop.weight.size()[-3:]
+        sh, sw, sz = self.convop.stride
+        oh, ow, oz = math.ceil(ih / sh), math.ceil(iw / sw), math.ceil(iz / sz)
+        pad_h = max((oh - 1) * self.convop.stride[0] + (kh - 1) * self.convop.dilation[0] + 1 - ih, 0)
+        pad_w = max((ow - 1) * self.convop.stride[1] + (kw - 1) * self.convop.dilation[1] + 1 - iw, 0)
+        pad_z = max((oz - 1) * self.convop.stride[2] + (kz - 1) * self.convop.dilation[2] + 1 - iz, 0)
+        if pad_h > 0 or pad_w > 0 or pad_z > 0:
+            self.static_padding = nn.ZeroPad2d((pad_w // 2, pad_w - pad_w // 2, pad_h // 2, pad_h - pad_h // 2, pad_z // 2, pad_z - pad_z // 2))
+        else:
+            self.static_padding = Identity()
+
+        # self.out_channels = self.convop.out_channels
+        
+    
+    def forward(self, x):
+        x = self.static_padding(x)
+        x = self.convop.forward(x)
+        # x = F.conv3d(x, self.weight, self.bias, self.stride, self.padding, self.dilation, self.groups)
+        return x
+
+    @property
+    def out_channels(self):
+        return self.convop.out_channels
+
+
 class Conv3dStaticSamePadding(nn.Conv3d):
     """ 3D Convolutions like TensorFlow, for a fixed image size"""
 
@@ -129,7 +168,7 @@ class Conv3dStaticSamePadding(nn.Conv3d):
 
         # Calculate padding based on image size and save it
         assert image_size is not None
-        ih, iw, iz = image_size if type(image_size) == list else [image_size, image_size, image_size]
+        ih, iw, iz = image_size if type(image_size) == list or type(image_size) == np.ndarray else [image_size, image_size, image_size]
         kh, kw, kz = self.weight.size()[-3:]
         sh, sw, sz = self.stride
         oh, ow, oz = math.ceil(ih / sh), math.ceil(iw / sw), math.ceil(iz / sz)
@@ -137,7 +176,7 @@ class Conv3dStaticSamePadding(nn.Conv3d):
         pad_w = max((ow - 1) * self.stride[1] + (kw - 1) * self.dilation[1] + 1 - iw, 0)
         pad_z = max((oz - 1) * self.stride[2] + (kz - 1) * self.dilation[2] + 1 - iz, 0)
         if pad_h > 0 or pad_w > 0 or pad_z > 0:
-            self.static_padding = nn.ZeroPad2d((pad_w // 2, pad_w - pad_w // 2, pad_h // 2, pad_h - pad_h // 2, pad_z // 2, pad_z - pad_z // 2))
+            self.static_padding = nn.ZeroPad2d((pad_z // 2, pad_z - pad_z // 2, pad_w // 2, pad_w - pad_w // 2, pad_h // 2, pad_h - pad_h // 2))
         else:
             self.static_padding = Identity()
 

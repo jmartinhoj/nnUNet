@@ -20,7 +20,7 @@ from torch import nn
 
 
 class nnUNetTrainerV2_3ConvPerStage(nnUNetTrainerV2):
-    def initialize_network(self):
+    def initialize_network(self, training=True):
         self.base_num_features = 24  # otherwise we run out of VRAM
         if self.threeD:
             conv_op = nn.Conv3d

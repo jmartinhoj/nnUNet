@@ -273,22 +273,27 @@ class Efficient_UNet(SegmentationNetwork):
         input_features = input_channels
 
 
-
+        self.efficient_model = efficient_model
         # ENCODER
-        blocks_args, global_params = get_model_params(efficient_model, override_params={"image_size": 128}) # TODO@jmartinhoj: DYNAMIC MODEL NAME
-        self.eff_net = EfficientNet3D(blocks_args, global_params, in_channels=1)
-
+        blocks_args, global_params = get_model_params(self.efficient_model, override_params={"image_size": 128}) # TODO@jmartinhoj: DYNAMIC MODEL NAME
+        count = 0
+        stage_idxs = []
+        self.eff_net = EfficientNet3D(stage_idxs, blocks_args, global_params, in_channels=input_channels)
+        # for i in blocks_args:
+        #     if(i.stride == [2]):
+        #         stage_idxs.append(count)
+        #     count = count + i.num_repeat
         self.eff_drop_connect_rate = global_params.drop_connect_rate
 
 
-        stage_idxs = (1, 3, 5, 11)
+        # stage_idxs = (1, 3, 5, 11)
         self.eff_stages = [ # each of these reduce the resolution by a half
             nn.Sequential(self.eff_net._conv_stem, self.eff_net._bn0, self.eff_net._swish),
-            self.eff_net._blocks[:stage_idxs[0]],
             self.eff_net._blocks[stage_idxs[0]:stage_idxs[1]],
             self.eff_net._blocks[stage_idxs[1]:stage_idxs[2]],
             self.eff_net._blocks[stage_idxs[2]:stage_idxs[3]],
-            self.eff_net._blocks[stage_idxs[3]:]
+            self.eff_net._blocks[stage_idxs[3]:stage_idxs[4]],
+            self.eff_net._blocks[stage_idxs[4]:]
         ]
         self.num_pool = num_pool
 
@@ -398,6 +403,10 @@ class Efficient_UNet(SegmentationNetwork):
                                               zip(list(self.upscale_logits_ops)[::-1], seg_outputs[:-1][::-1])])
         else:
             return seg_outputs[-1]
+
+    def __repr__(self):
+        return "EfficientUNet " + self.efficient_model
+
 
     @staticmethod
     def compute_approx_vram_consumption(patch_size, num_pool_per_axis, base_num_features, max_num_features,

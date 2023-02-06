@@ -20,7 +20,7 @@ from torch import nn
 
 
 class nnUNetTrainerV2_allConv3x3(nnUNetTrainerV2):
-    def initialize_network(self):
+    def initialize_network(self, training=True):
         """
         - momentum 0.99
         - SGD instead of Adam

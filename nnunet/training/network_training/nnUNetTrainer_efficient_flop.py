@@ -5,8 +5,7 @@ from nnunet.network_architecture.generic_UNet import Generic_UNet
 from nnunet.network_architecture.initialization import InitWeights_He
 import torch
 from nnunet.utilities.nd_softmax import softmax_helper
-from ptflops import get_model_complexity_info
-
+# from ptflops import get_model_complexity_info
 
 
 
@@ -19,7 +18,7 @@ class nnUNetTrainer_efficient_flop(nnUNetTrainerV2):
 
         self.max_num_epochs = 1500
     
-    def initialize_network(self):
+    def initialize_network(self, training=True):
         """
         - momentum 0.99
         - SGD instead of Adam
@@ -49,7 +48,7 @@ class nnUNetTrainer_efficient_flop(nnUNetTrainerV2):
                                     self.conv_per_stage, 2, conv_op, norm_op, norm_op_kwargs, dropout_op,
                                     dropout_op_kwargs,
                                     net_nonlin, net_nonlin_kwargs, True, False, lambda x: x, InitWeights_He(1e-2),
-                                    self.net_num_pool_op_kernel_sizes, self.net_conv_kernel_sizes, False, True, True)
+                                    self.net_num_pool_op_kernel_sizes, self.net_conv_kernel_sizes, False, True, True, efficient_model="efficientnet-b3")
         
         macs, params = get_model_complexity_info(self.network, (1, 128, 128, 128), as_strings=True,print_per_layer_stat=True, verbose=True)
 

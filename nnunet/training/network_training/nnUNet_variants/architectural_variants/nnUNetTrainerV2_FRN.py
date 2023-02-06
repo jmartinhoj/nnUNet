@@ -24,7 +24,7 @@ import torch
 
 
 class nnUNetTrainerV2_FRN(nnUNetTrainerV2):
-    def initialize_network(self):
+    def initialize_network(self, training=True):
         """
         changed deep supervision to False
         :return:

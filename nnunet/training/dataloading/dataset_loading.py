@@ -189,6 +189,7 @@ class DataLoader3D(SlimDataLoaderBase):
         self.has_prev_stage = has_prev_stage
         self.patch_size = patch_size
         self.list_of_keys = list(self._data.keys())
+        self.not_chosen_keys = list(self._data.keys())
         # need_to_pad denotes by how much we need to pad the data so that if we sample a patch of size final_patch_size
         # (which is what the network will get) these patches will also cover the border of the patients
         self.need_to_pad = (np.array(patch_size) - np.array(final_patch_size)).astype(int)
@@ -220,8 +221,17 @@ class DataLoader3D(SlimDataLoaderBase):
         seg_shape = (self.batch_size, num_seg, *self.patch_size)
         return data_shape, seg_shape
 
+    
+    def reset_chosen_keys(self):
+        print("resetting chosen keys...")
+        self.not_chosen_keys = list(self._data.keys())
+    
     def generate_train_batch(self):
         selected_keys = np.random.choice(self.list_of_keys, self.batch_size, True, None)
+        # selected_keys =  (np.random.choice(self.not_chosen_keys, self.batch_size, False, None) if len(self.not_chosen_keys) >= self.batch_size else  np.random.choice(self.list_of_keys, self.batch_size, True, None))
+        # if(len(self.not_chosen_keys) >= self.batch_size):
+        #     for i in selected_keys: self.not_chosen_keys.remove(i)
+        # print("not chosen", self.not_chosen_keys)
         data = np.zeros(self.data_shape, dtype=np.float32)
         seg = np.zeros(self.seg_shape, dtype=np.float32)
         case_properties = []

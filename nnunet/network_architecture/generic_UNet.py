@@ -407,6 +407,10 @@ class Generic_UNet(SegmentationNetwork):
         else:
             return seg_outputs[-1]
 
+    def __repr__(self):
+        return "Generic Unet "
+
+
     @staticmethod
     def compute_approx_vram_consumption(patch_size, num_pool_per_axis, base_num_features, max_num_features,
                                         num_modalities, num_classes, pool_op_kernel_sizes, deep_supervision=False,

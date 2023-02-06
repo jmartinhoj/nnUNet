@@ -121,7 +121,7 @@ class nnUNetTrainerV2_DP(nnUNetTrainerV2):
             self.print_to_log_file('self.was_initialized is True, not running self.initialize again')
         self.was_initialized = True
 
-    def initialize_network(self):
+    def initialize_network(self, training=True):
         """
         replace genericUNet with the implementation of above for super speeds
         """

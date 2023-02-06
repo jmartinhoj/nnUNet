@@ -11,6 +11,8 @@ from .utils import (
     efficientnet_params,
     Swish,
     MemoryEfficientSwish,
+    BlockArgs,
+    GlobalParams
 )
 
 class FusedMBConvBlock3D(nn.Module):
@@ -96,6 +98,7 @@ class FusedMBConvBlock3D(nn.Module):
         """Sets swish function as memory efficient (for training) or standard (for export)"""
         self._swish = MemoryEfficientSwish() if memory_efficient else Swish()
 
+
 class MBConvBlock3D(nn.Module):
     """
     Mobile Inverted Residual Bottleneck Block
@@ -146,6 +149,10 @@ class MBConvBlock3D(nn.Module):
         self._bn2 = nn.BatchNorm3d(num_features=final_oup, momentum=self._bn_mom, eps=self._bn_eps)
         self._swish = MemoryEfficientSwish()
 
+    @property
+    def output_channels(self):
+        return self._block_args.output_filters
+
     def forward(self, inputs, drop_connect_rate=None):
         """
         :param inputs: input tensor
@@ -180,6 +187,15 @@ class MBConvBlock3D(nn.Module):
         self._swish = MemoryEfficientSwish() if memory_efficient else Swish()
 
 
+
+class MBConvBlock3DHeadless(MBConvBlock3D):
+    def __init__(self, input_flters, output_filters, num_repeat, kernel_size, stride, expand_ratio, se_ratio, id_skip, batch_norm_momentum, batch_norm_epsilon, image_size) -> None:
+
+        super().__init__(BlockArgs(input_filters=input_flters, output_filters=output_filters, kernel_size=kernel_size, stride=stride, expand_ratio=expand_ratio, se_ratio=se_ratio, id_skip=id_skip, num_repeat=num_repeat), GlobalParams(batch_norm_epsilon=batch_norm_epsilon, batch_norm_momentum=batch_norm_momentum, image_size=image_size))
+
+
+
+
 class EfficientNet3D(nn.Module):
     """
     An EfficientNet model. Most easily loaded with the .from_name or .from_pretrained methods
@@ -193,7 +209,7 @@ class EfficientNet3D(nn.Module):
 
     """
 
-    def __init__(self, blocks_args=None, global_params=None, in_channels=3):
+    def __init__(self, stage_idx: list, blocks_args=None, global_params=None, in_channels=3, pool_op_kernel_sizes=None):
         super().__init__()
         assert isinstance(blocks_args, list), 'blocks_args should be a list'
         assert len(blocks_args) > 0, 'block args must be greater than 0'
@@ -214,14 +230,24 @@ class EfficientNet3D(nn.Module):
 
         # Build blocks
         self._blocks = nn.ModuleList([])
+        count = 0
+        i = 0
         for block_args in self._blocks_args:
-
+            if(block_args.stride == [2]):
+                stage_idx.append(count)
+                if(pool_op_kernel_sizes is not None):
+                    if(pool_op_kernel_sizes[i][0] != 2 or pool_op_kernel_sizes[i][1] != 2 or pool_op_kernel_sizes[i][2] != 2):
+                        block_args = block_args._replace(
+                            stride=pool_op_kernel_sizes[i]
+                        )
+                i = i + 1
             # Update block input and output filters based on depth multiplier.
             block_args = block_args._replace(
                 input_filters=round_filters(block_args.input_filters, self._global_params),
                 output_filters=round_filters(block_args.output_filters, self._global_params),
                 num_repeat=round_repeats(block_args.num_repeat, self._global_params)
             )
+            count = count + block_args.num_repeat
 
             # The first block needs to take care of stride and filter size increase.
             self._blocks.append(MBConvBlock3D(block_args, self._global_params))
